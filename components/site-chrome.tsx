@@ -32,26 +32,35 @@ export function SiteHeader({
         : "text-muted-foreground hover:text-foreground"
     }`;
 
-  return (
-    <header className="rise rise-1 flex items-baseline justify-between border-b py-5">
-      <Link href={`/${locale}`} className="flex items-center gap-3">
-        <Mark />
-        <span className="text-xl font-bold tracking-tight">netto.</span>
+  const pageLinks = (
+    <>
+      <Link href={`/${locale}`} className={pageLink("calculator")}>
+        {dict.nav.calculator}
       </Link>
-      <div className="flex items-center gap-4">
-        <nav className="flex items-center gap-1">
-          <Link href={`/${locale}`} className={pageLink("calculator")}>
-            {dict.nav.calculator}
-          </Link>
-          <Link href={`/${locale}/guide`} className={pageLink("guide")}>
-            {dict.nav.guide}
-          </Link>
-        </nav>
-        <span aria-hidden className="h-4 w-px bg-border" />
-        <Suspense fallback={<div className="h-6 w-32" aria-hidden />}>
-          <LangNav current={locale} />
-        </Suspense>
+      <Link href={`/${locale}/guide`} className={pageLink("guide")}>
+        {dict.nav.guide}
+      </Link>
+    </>
+  );
+
+  return (
+    <header className="rise rise-1 border-b py-5">
+      <div className="flex items-baseline justify-between gap-4">
+        <Link href={`/${locale}`} className="flex items-center gap-3">
+          <Mark />
+          <span className="text-xl font-bold tracking-tight">netto.</span>
+        </Link>
+        <div className="flex items-center gap-4">
+          {/* Page nav sits inline on sm+; on mobile it drops to its own row below. */}
+          <nav className="hidden items-center gap-1 sm:flex">{pageLinks}</nav>
+          <span aria-hidden className="hidden h-4 w-px bg-border sm:block" />
+          <Suspense fallback={<div className="h-6 w-32" aria-hidden />}>
+            <LangNav current={locale} />
+          </Suspense>
+        </div>
       </div>
+      {/* Mobile primary nav — aligned to the logo's left edge (−ml-2 cancels the first link's padding). */}
+      <nav className="-ml-2 mt-3 flex items-center gap-1 sm:hidden">{pageLinks}</nav>
     </header>
   );
 }
