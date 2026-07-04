@@ -76,31 +76,37 @@ function writeUrlState(s: CalcState) {
   window.history.replaceState(null, "", `?${p.toString()}`);
 }
 
+/** Merge a patch and re-derive grossMonthly from the entry period. */
+function applyPatch(prev: CalcState, patch: Partial<CalcState>): CalcState {
+  const next = { ...prev, ...patch };
+  const payouts = next.has13th ? 13 : 12;
+  next.grossMonthly =
+    next.inputPeriod === "year" ? next.grossValue / payouts : next.grossValue;
+  return next;
+}
+
 export function Calculator({ dict, locale }: { dict: Dict; locale: Locale }) {
   const [state, setState] = React.useState<CalcState>(DEFAULT_STATE);
+  const interacted = React.useRef(false);
 
   // Hydrate from the share URL once, after mount (avoids SSR mismatch).
   React.useEffect(() => {
     const fromUrl = readUrlState();
     if (Object.keys(fromUrl).length === 0) return;
-    setState((s) => {
-      const next = { ...s, ...fromUrl };
-      const payouts = next.has13th ? 13 : 12;
-      next.grossMonthly =
-        next.inputPeriod === "year" ? next.grossValue / payouts : next.grossValue;
-      return next;
-    });
+    setState((s) => applyPatch(s, fromUrl));
   }, []);
 
+  // Mirror state into the URL, but only after the user actually changed
+  // something — as a post-render effect, never during render (the router
+  // listens to history.replaceState).
+  React.useEffect(() => {
+    if (!interacted.current) return;
+    writeUrlState(state);
+  }, [state]);
+
   const update = React.useCallback((patch: Partial<CalcState>) => {
-    setState((prev) => {
-      const next = { ...prev, ...patch };
-      const payouts = next.has13th ? 13 : 12;
-      next.grossMonthly =
-        next.inputPeriod === "year" ? next.grossValue / payouts : next.grossValue;
-      writeUrlState(next);
-      return next;
-    });
+    interacted.current = true;
+    setState((prev) => applyPatch(prev, patch));
   }, []);
 
   const result = React.useMemo(() => calcSalary(state), [state]);
