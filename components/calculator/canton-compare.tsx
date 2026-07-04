@@ -64,7 +64,9 @@ export function CantonCompare({
               </span>
               <div className="h-4 flex-1">
                 <div
-                  className={`h-full ${selected ? "bg-primary" : "bg-chart-5"}`}
+                  className={`h-full transition-[width,background-color] duration-500 ease-out ${
+                    selected ? "bg-primary" : "bg-chart-5"
+                  }`}
                   style={{ width: `${(row.netAnnual / max) * 100}%` }}
                 />
               </div>
