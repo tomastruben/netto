@@ -1,0 +1,388 @@
+"use client";
+
+import * as React from "react";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { chf, chfWhole, pct } from "@/lib/format";
+import { CONST_2026 } from "@/lib/salary/constants";
+import type { SalaryResult } from "@/lib/salary/engine";
+import type { Dict } from "@/lib/i18n";
+import type { CalcState } from "./calculator";
+
+interface Segment {
+  key: string;
+  label: string;
+  value: number;
+  className: string;
+}
+
+function CompositionBar({ segments, netLabel }: { segments: Segment[]; netLabel: string }) {
+  const total = segments.reduce((s, x) => s + x.value, 0);
+  if (total <= 0) return null;
+  return (
+    <div>
+      <div className="flex h-9 w-full overflow-hidden border">
+        {segments.map((s) =>
+          s.value > 0 ? (
+            <div
+              key={s.key}
+              title={`${s.label} — ${chfWhole(s.value)}`}
+              style={{ width: `${(s.value / total) * 100}%` }}
+              className={`${s.className} transition-[width] duration-300`}
+            />
+          ) : null
+        )}
+      </div>
+      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+        {segments
+          .filter((s) => s.value > 0)
+          .map((s) => (
+            <span key={s.key} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <span className={`size-2 border ${s.className}`} />
+              {s.key === "net" ? netLabel : s.label}
+              <span className="num">{pct(s.value / total)}</span>
+            </span>
+          ))}
+      </div>
+    </div>
+  );
+}
+
+function Row({
+  label,
+  hint,
+  rate,
+  monthly,
+  annual,
+  negative = true,
+}: {
+  label: string;
+  hint?: string;
+  rate?: string;
+  monthly: number;
+  annual: number;
+  negative?: boolean;
+}) {
+  return (
+    <TableRow>
+      <TableCell className="py-2.5">
+        <div className="font-medium">{label}</div>
+        {hint && <div className="text-[11px] text-muted-foreground">{hint}</div>}
+      </TableCell>
+      <TableCell className="num text-right text-xs text-muted-foreground">
+        {rate ?? ""}
+      </TableCell>
+      <TableCell className="num text-right">
+        {negative && monthly > 0 ? "−" : ""}
+        {chf(monthly)}
+      </TableCell>
+      <TableCell className="num hidden text-right text-muted-foreground sm:table-cell">
+        {negative && annual > 0 ? "−" : ""}
+        {chfWhole(annual)}
+      </TableCell>
+    </TableRow>
+  );
+}
+
+export function Results({
+  dict,
+  state,
+  result,
+}: {
+  dict: Dict;
+  state: CalcState;
+  result: SalaryResult;
+}) {
+  const t = dict.results;
+  const r = result;
+  const qst = state.quellensteuer;
+  const perPayout = (annual: number) => annual / r.payouts;
+
+  // Payslip net: social only for residents; social + withholding tax for B/L.
+  const payslipNetAnnual = qst
+    ? r.grossAnnual - r.totalSocialAnnual - r.taxAnnual
+    : r.grossAnnual - r.totalSocialAnnual;
+  const afterTaxMonthly = (r.grossAnnual - r.totalSocialAnnual - r.taxAnnual) / 12;
+  const deductedAnnual = qst ? r.totalSocialAnnual + r.taxAnnual : r.totalSocialAnnual;
+
+  const s = r.social;
+  const segments: Segment[] = [
+    { key: "net", label: t.net, value: r.netAnnual, className: "bg-background" },
+    { key: "bvg", label: t.bvg, value: s.bvg, className: "bg-chart-5" },
+    { key: "ahv", label: t.ahv, value: s.ahv, className: "bg-chart-4" },
+    { key: "alv", label: t.alv, value: s.alv, className: "bg-chart-3" },
+    { key: "nbu", label: t.nbu, value: s.nbu, className: "bg-chart-2" },
+    { key: "ktg", label: t.ktg, value: s.ktg, className: "bg-foreground" },
+    { key: "tax", label: qst ? t.taxQst : t.tax, value: r.taxAnnual, className: "bg-primary" },
+  ];
+
+  const grossMonthlyPayout = r.grossAnnual / r.payouts;
+  const capped = r.grossAnnual > CONST_2026.uvgCeiling;
+
+  return (
+    <Tabs defaultValue="employee">
+      <div className="flex items-center justify-between border-b pb-3">
+        <h2 className="microlabel">{dict.results.deductions}</h2>
+        <TabsList className="h-8">
+          <TabsTrigger value="employee" className="px-3 text-xs">
+            {dict.employer.employeeTab}
+          </TabsTrigger>
+          <TabsTrigger value="employer" className="px-3 text-xs">
+            {dict.employer.employerTab}
+          </TabsTrigger>
+        </TabsList>
+      </div>
+
+      <TabsContent value="employee" className="space-y-7 pt-4">
+        {/* Hero */}
+        <div>
+          <div className="flex items-baseline justify-between">
+            <span className="text-sm text-muted-foreground">
+              {qst ? t.netMonthlyQst : t.netMonthly}
+            </span>
+            {r.payouts === 13 && (
+              <Badge variant="outline" className="num text-[10px]">
+                × 13
+              </Badge>
+            )}
+          </div>
+          <div className="num mt-1 text-5xl font-medium tracking-tight sm:text-7xl">
+            {chf(perPayout(payslipNetAnnual))}
+          </div>
+          <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            <span>
+              <span className="num text-foreground">{chfWhole(payslipNetAnnual)}</span>{" "}
+              {t.netAnnual}
+            </span>
+            <span>
+              <span className="num text-foreground">
+                {pct(r.grossAnnual > 0 ? payslipNetAnnual / r.grossAnnual : 0)}
+              </span>{" "}
+              {t.ofGross}
+            </span>
+          </div>
+        </div>
+
+        {/* After-tax secondary (residents) or QST note */}
+        {qst ? (
+          <p className="border-l-2 border-primary pl-3 text-xs text-muted-foreground">
+            {t.taxWithheld}
+          </p>
+        ) : (
+          <div className="flex items-baseline justify-between border-l-2 border-primary pl-3">
+            <div>
+              <div className="text-sm font-medium">{t.afterTax}</div>
+              <div className="text-[11px] text-muted-foreground">{t.afterTaxHint}</div>
+            </div>
+            <div className="num text-2xl">{chf(afterTaxMonthly)}</div>
+          </div>
+        )}
+
+        {/* Composition */}
+        <div>
+          <h3 className="microlabel mb-2">{t.composition}</h3>
+          <CompositionBar segments={segments} netLabel={t.net} />
+        </div>
+
+        {/* Deduction table */}
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="microlabel h-8">{t.item}</TableHead>
+              <TableHead className="microlabel h-8 text-right">{t.rate}</TableHead>
+              <TableHead className="microlabel h-8 text-right">{t.monthlyCol}</TableHead>
+              <TableHead className="microlabel h-8 hidden text-right sm:table-cell">
+                {t.annualCol}
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <Row
+              label={t.grossLabel}
+              monthly={grossMonthlyPayout}
+              annual={r.grossAnnual}
+              negative={false}
+            />
+            <Row
+              label={t.ahv}
+              hint={t.ahvHint}
+              rate="5.3%"
+              monthly={perPayout(s.ahv)}
+              annual={s.ahv}
+            />
+            <Row
+              label={t.alv}
+              hint={t.alvHint}
+              rate="1.1%"
+              monthly={perPayout(s.alv)}
+              annual={s.alv}
+            />
+            <Row
+              label={t.nbu}
+              hint={t.nbuHint}
+              rate={pct(state.nbuRate)}
+              monthly={perPayout(s.nbu)}
+              annual={s.nbu}
+            />
+            {s.ktg > 0 && (
+              <Row
+                label={t.ktg}
+                hint={t.ktgHint}
+                rate={pct(state.ktgRate)}
+                monthly={perPayout(s.ktg)}
+                annual={s.ktg}
+              />
+            )}
+            {s.bvg > 0 ? (
+              <Row
+                label={t.bvg}
+                hint={t.bvgHint}
+                monthly={perPayout(s.bvg)}
+                annual={s.bvg}
+              />
+            ) : (
+              <TableRow>
+                <TableCell className="py-2.5 font-medium">{t.bvg}</TableCell>
+                <TableCell colSpan={3} className="text-right text-[11px] text-muted-foreground">
+                  {t.bvgNone}
+                </TableCell>
+              </TableRow>
+            )}
+            {qst && (
+              <Row
+                label={t.taxQst}
+                hint={t.taxHint}
+                rate={pct(r.taxRate)}
+                monthly={perPayout(r.taxAnnual)}
+                annual={r.taxAnnual}
+              />
+            )}
+          </TableBody>
+          <TableFooter>
+            <TableRow className="border-t-2 border-foreground bg-transparent hover:bg-transparent">
+              <TableCell className="font-semibold">{t.totalDeductions}</TableCell>
+              <TableCell className="num text-right text-xs text-muted-foreground">
+                {pct(r.grossAnnual > 0 ? deductedAnnual / r.grossAnnual : 0)}
+              </TableCell>
+              <TableCell className="num text-right font-semibold">
+                −{chf(perPayout(deductedAnnual))}
+              </TableCell>
+              <TableCell className="num hidden text-right font-semibold sm:table-cell">
+                −{chfWhole(deductedAnnual)}
+              </TableCell>
+            </TableRow>
+            {!qst && (
+              <TableRow className="hover:bg-transparent">
+                <TableCell className="font-medium">
+                  {t.tax}
+                  <div className="text-[11px] font-normal text-muted-foreground">
+                    {t.taxHint}
+                  </div>
+                </TableCell>
+                <TableCell className="num text-right text-xs text-muted-foreground">
+                  {pct(r.taxRate)}
+                </TableCell>
+                <TableCell className="num text-right text-muted-foreground">
+                  −{chf(r.taxAnnual / 12)}
+                </TableCell>
+                <TableCell className="num hidden text-right text-muted-foreground sm:table-cell">
+                  −{chfWhole(r.taxAnnual)}
+                </TableCell>
+              </TableRow>
+            )}
+            {state.children > 0 && (
+              <TableRow className="hover:bg-transparent">
+                <TableCell className="font-medium text-foreground">
+                  {t.childAllowance}
+                  <div className="text-[11px] font-normal text-muted-foreground">
+                    {t.childAllowanceHint}
+                  </div>
+                </TableCell>
+                <TableCell />
+                <TableCell className="num text-right text-primary">
+                  +{chf(r.childAllowanceMonthly)}
+                </TableCell>
+                <TableCell className="num hidden text-right text-primary sm:table-cell">
+                  +{chfWhole(r.childAllowanceMonthly * 12)}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableFooter>
+        </Table>
+
+        <p className="text-[11px] leading-relaxed text-muted-foreground">
+          {capped && <span className="mr-1">{t.ceilingNote} ·</span>}
+          {t.estimateNote}{" "}
+          <a
+            href="https://swisstaxcalculator.estv.admin.ch"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-foreground"
+          >
+            {t.estimateLink}
+          </a>
+        </p>
+      </TabsContent>
+
+      <TabsContent value="employer" className="space-y-7 pt-4">
+        <div>
+          <span className="text-sm text-muted-foreground">
+            {dict.employer.totalCost}
+          </span>
+          <div className="num mt-1 text-5xl font-medium tracking-tight sm:text-7xl">
+            {chfWhole(r.grossAnnual + r.employer.totalAnnual)}
+          </div>
+          <div className="mt-2 text-sm text-muted-foreground">
+            {dict.employer.totalCostHint} —{" "}
+            <span className="num text-foreground">
+              +{pct(r.grossAnnual > 0 ? r.employer.totalAnnual / r.grossAnnual : 0)}
+            </span>{" "}
+            {dict.employer.onTop}
+          </div>
+        </div>
+
+        <Table>
+          <TableBody>
+            <Row
+              label={t.grossLabel}
+              monthly={grossMonthlyPayout}
+              annual={r.grossAnnual}
+              negative={false}
+            />
+            <Row label={t.ahv} rate="5.3%" monthly={perPayout(r.employer.ahv)} annual={r.employer.ahv} negative={false} />
+            <Row label={t.alv} rate="1.1%" monthly={perPayout(r.employer.alv)} annual={r.employer.alv} negative={false} />
+            <Row label={dict.employer.bu} rate="0.5%" monthly={perPayout(r.employer.nbu)} annual={r.employer.nbu} negative={false} />
+            {r.employer.ktg > 0 && (
+              <Row label={t.ktg} monthly={perPayout(r.employer.ktg)} annual={r.employer.ktg} negative={false} />
+            )}
+            {r.employer.bvg > 0 && (
+              <Row label={t.bvg} monthly={perPayout(r.employer.bvg)} annual={r.employer.bvg} negative={false} />
+            )}
+            <Row label={dict.employer.fak} rate="1.5%" monthly={perPayout(r.employer.fak)} annual={r.employer.fak} negative={false} />
+          </TableBody>
+          <TableFooter>
+            <TableRow className="border-t-2 border-foreground bg-transparent hover:bg-transparent">
+              <TableCell className="font-semibold">{dict.employer.totalCost}</TableCell>
+              <TableCell />
+              <TableCell className="num text-right font-semibold">
+                {chf(perPayout(r.grossAnnual + r.employer.totalAnnual))}
+              </TableCell>
+              <TableCell className="num hidden text-right font-semibold sm:table-cell">
+                {chfWhole(r.grossAnnual + r.employer.totalAnnual)}
+              </TableCell>
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </TabsContent>
+    </Tabs>
+  );
+}

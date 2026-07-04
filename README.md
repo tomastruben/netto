@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# netto. — Swiss net salary calculator
 
-## Getting Started
+Transparent gross-to-net salary calculator for Switzerland, 2026. All 26 cantons,
+four languages (DE/EN/FR/IT), every deduction shown with its rate. Everything is
+computed client-side — no backend, no data leaves the browser.
 
-First, run the development server:
+## Stack
+
+Next.js 16 (App Router, static prerender per locale) · React 19 · Tailwind 4 ·
+shadcn/ui (Base UI primitives) · vitest.
+
+## Develop
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev     # dev server on :3000 (routes: /de /en /fr /it)
+npm test        # engine tests
+npm run build   # static production build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Where things live
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `lib/salary/constants.ts` — 2026 federal parameters (update once a year)
+- `lib/salary/cantons.ts` — per-canton tax curves (estimates, canton capitals),
+  church-tax modes, child allowances
+- `lib/salary/engine.ts` — pure calculation functions + canton comparison
+- `lib/i18n.ts` — all four language dictionaries
+- `components/calculator/` — form, results, canton comparison, monetization slots
+- `docs/specs/` — design doc (research findings, v1 decisions, v2 path)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Accuracy model (v1)
 
-## Learn More
+Social insurance (AHV/IV/EO, ALV, NBU, KTG, BVG) is exact per the published 2026
+parameters. Income tax / withholding tax is an interpolated estimate for the canton
+capital and is labeled as such in the UI, linking to the official ESTV calculator.
+v2 path: ingest the official ESTV QST tariff files (tar26xx.txt) and per-commune
+multipliers — see the design doc.
 
-To learn more about Next.js, take a look at the following resources:
+## Sharing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Calculator state lives in the URL (`?g=12000&c=GE&a=40&k=2&m=1`), so results are
+shareable and language switching preserves inputs.
