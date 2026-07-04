@@ -12,6 +12,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import { chf, chfWhole, pct } from "@/lib/format";
 import { CONST_2026 } from "@/lib/salary/constants";
 import type { SalaryResult } from "@/lib/salary/engine";
@@ -26,34 +33,78 @@ interface Segment {
 }
 
 function CompositionBar({ segments, netLabel }: { segments: Segment[]; netLabel: string }) {
+  const [active, setActive] = React.useState<string | null>(null);
   const total = segments.reduce((s, x) => s + x.value, 0);
   if (total <= 0) return null;
+  const visible = segments
+    .filter((s) => s.value > 0)
+    .map((s) => ({ ...s, label: s.key === "net" ? netLabel : s.label }));
+
+  const dimmed = (key: string) =>
+    active !== null && active !== key ? "opacity-35" : "";
+
   return (
-    <div>
-      <div className="flex h-9 w-full overflow-hidden border">
-        {segments.map((s) =>
-          s.value > 0 ? (
-            <div
+    <TooltipProvider>
+      <div>
+        <div
+          className="flex h-9 w-full overflow-hidden border"
+          onMouseLeave={() => setActive(null)}
+        >
+          {visible.map((s) => (
+            <Tooltip key={s.key}>
+              <TooltipTrigger
+                render={
+                  <div
+                    tabIndex={0}
+                    aria-label={`${s.label}: CHF ${chfWhole(s.value)} (${pct(s.value / total)})`}
+                    style={{ width: `${(s.value / total) * 100}%` }}
+                    className={cn(
+                      s.className,
+                      "outline-none transition-all duration-300",
+                      "focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                      dimmed(s.key)
+                    )}
+                    onMouseEnter={() => setActive(s.key)}
+                    onFocus={() => setActive(s.key)}
+                    onBlur={() => setActive(null)}
+                  />
+                }
+              />
+              <TooltipContent>
+                <span className="font-medium">{s.label}</span>
+                <span className="num">
+                  {chfWhole(s.value)} · {pct(s.value / total)}
+                </span>
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </div>
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+          {visible.map((s) => (
+            <span
               key={s.key}
-              title={`${s.label} — ${chfWhole(s.value)}`}
-              style={{ width: `${(s.value / total) * 100}%` }}
-              className={`${s.className} transition-[width] duration-300`}
-            />
-          ) : null
-        )}
-      </div>
-      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-        {segments
-          .filter((s) => s.value > 0)
-          .map((s) => (
-            <span key={s.key} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <span className={`size-2 border ${s.className}`} />
-              {s.key === "net" ? netLabel : s.label}
+              onMouseEnter={() => setActive(s.key)}
+              onMouseLeave={() => setActive(null)}
+              className={cn(
+                "flex cursor-default items-center gap-1.5 text-[11px] transition-all duration-200",
+                active === s.key ? "text-foreground" : "text-muted-foreground",
+                dimmed(s.key)
+              )}
+            >
+              <span
+                className={cn(
+                  "size-2 border transition-transform duration-200",
+                  s.className,
+                  active === s.key && "scale-125"
+                )}
+              />
+              {s.label}
               <span className="num">{pct(s.value / total)}</span>
             </span>
           ))}
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
 
