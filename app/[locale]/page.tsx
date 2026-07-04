@@ -31,12 +31,7 @@ export default async function Page({
       <header className="rise rise-1 flex items-baseline justify-between border-b py-5">
         <div className="flex items-center gap-3">
           <Mark />
-          <div className="flex flex-col leading-none">
-            <span className="text-xl font-bold tracking-tight">netto.</span>
-            <span className="microlabel mt-1 hidden sm:block">
-              {dict.header.tagline}
-            </span>
-          </div>
+          <span className="text-xl font-bold tracking-tight">netto.</span>
         </div>
         <Suspense
           fallback={<div className="h-6 w-32" aria-hidden />}

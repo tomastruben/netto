@@ -4,7 +4,6 @@ export const DEFAULT_LOCALE: Locale = "de";
 
 export interface Dict {
   meta: { title: string; description: string };
-  header: { tagline: string; privacy: string };
   form: {
     legend: string;
     gross: string;
@@ -121,10 +120,6 @@ const de: Dict = {
     title: "Brutto-Netto-Rechner Schweiz 2026 — Nettolohn berechnen",
     description:
       "Berechnen Sie Ihren Nettolohn 2026 für alle 26 Kantone: AHV, ALV, NBU, BVG, Quellensteuer und Steuerschätzung — transparent, mit allen Sätzen. Kostenlos und ohne Anmeldung.",
-  },
-  header: {
-    tagline: "Der transparente Brutto-Netto-Rechner für die Schweiz",
-    privacy: "Alles wird lokal berechnet — Ihr Lohn verlässt den Browser nie.",
   },
   form: {
     legend: "Ihre Angaben",
@@ -247,10 +242,6 @@ const en: Dict = {
     description:
       "Calculate your 2026 Swiss net salary for all 26 cantons: AHV, ALV, accident insurance, BVG pension, withholding tax and an income tax estimate — fully transparent, every rate shown. Free, no sign-up.",
   },
-  header: {
-    tagline: "The transparent gross-to-net calculator for Switzerland",
-    privacy: "Everything is computed locally — your salary never leaves your browser.",
-  },
   form: {
     legend: "Your details",
     gross: "Gross salary",
@@ -372,10 +363,6 @@ const fr: Dict = {
     description:
       "Calculez votre salaire net 2026 pour les 26 cantons : AVS, AC, AANP, LPP, impôt à la source et estimation fiscale — transparent, tous les taux affichés. Gratuit, sans inscription.",
   },
-  header: {
-    tagline: "Le calculateur brut-net transparent pour la Suisse",
-    privacy: "Tout est calculé localement — votre salaire ne quitte jamais votre navigateur.",
-  },
   form: {
     legend: "Vos données",
     gross: "Salaire brut",
@@ -496,10 +483,6 @@ const it: Dict = {
     title: "Calcolatore stipendio netto Svizzera 2026 — dal lordo al netto",
     description:
       "Calcola il tuo stipendio netto 2026 per tutti i 26 cantoni: AVS, AD, AINP, LPP, imposta alla fonte e stima fiscale — trasparente, con tutte le aliquote. Gratuito, senza registrazione.",
-  },
-  header: {
-    tagline: "Il calcolatore lordo-netto trasparente per la Svizzera",
-    privacy: "Tutto è calcolato localmente — il tuo stipendio non lascia mai il browser.",
   },
   form: {
     legend: "I tuoi dati",
