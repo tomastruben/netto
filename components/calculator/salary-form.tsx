@@ -7,7 +7,6 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
-  FieldLegend,
   FieldSet,
 } from "@/components/ui/field";
 import {
@@ -71,7 +70,14 @@ export function SalaryForm({
 
   return (
     <FieldSet className="lg:sticky lg:top-6">
-      <FieldLegend className="microlabel border-b pb-3">{t.legend}</FieldLegend>
+      {/* Plain <legend> styled as a microlabel, identical to every other
+          section header (Deductions, Insights, …). min-h + mb match the
+          Deductions header's h-8 tab row so both columns' titles are the same
+          height and their first fields align. FieldLegend is avoided here
+          because its data-[variant] font-size outranks .microlabel. */}
+      <legend className="microlabel mb-6 flex min-h-[45px] w-full items-center border-b pb-3">
+        {t.legend}
+      </legend>
       <FieldGroup className="gap-5">
         {/* Gross salary + period */}
         <Field>
