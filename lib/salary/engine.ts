@@ -1,11 +1,7 @@
 import { CONST_2026 } from "./constants";
-import {
-  CANTON_DATA,
-  CHILD_TAX_FACTOR,
-  DOUBLE_INCOME_FACTOR,
-  MARRIED_FACTOR,
-  type Canton,
-} from "./cantons";
+import { CANTON_DATA, type Canton } from "./cantons";
+import { TAX_CURVES } from "./tax-curves";
+import { QST_ANNUAL_MODEL, qstRate, qstTariffCode } from "./qst";
 import { interpolateRate } from "./interpolate";
 
 export interface SalaryInput {
@@ -25,6 +21,8 @@ export interface SalaryInput {
   nbuRate: number;
   /** Daily sickness allowance rate, employee share (0 if employer-paid/none). */
   ktgRate: number;
+  /** B/L permit: tax withheld at source — uses the official QST tariff. */
+  quellensteuer?: boolean;
 }
 
 export interface SocialDeductions {
@@ -81,9 +79,12 @@ export function socialDeductions(
 }
 
 /**
- * Income tax estimate (direct federal + cantonal + communal at the canton capital).
- * Single-person burden curve, adjusted for marital status, double income, children
- * and church membership. v1 estimate — see design doc.
+ * Ordinary income tax (direct federal + cantonal + communal at the canton
+ * capital), interpolated on official ESTV burden curves per household profile
+ * (see tax-curves.ts). Children interpolate between the official 0- and
+ * 2-child curves via a per-child ratio; single parents use the married-based
+ * curves (parent tariff). `doubleIncome` assumes a 50/50 household at twice
+ * the entered gross and returns this earner's half of the household tax.
  */
 export function taxEstimate(
   grossAnnual: number,
@@ -93,16 +94,60 @@ export function taxEstimate(
   >
 ): number {
   const data = CANTON_DATA[input.canton];
-  let rate = interpolateRate(data.taxCurve, grossAnnual);
-  if (input.married) {
-    rate *= interpolateRate(MARRIED_FACTOR, grossAnnual);
-    if (input.doubleIncome) rate *= DOUBLE_INCOME_FACTOR;
+  const curves = TAX_CURVES[input.canton];
+  const twoEarner = input.married && input.doubleIncome;
+
+  let rate: number;
+  if (twoEarner) rate = interpolateRate(curves.twoEarner, grossAnnual * 2);
+  else if (input.married || input.children > 0)
+    rate = interpolateRate(curves.married, grossAnnual);
+  else rate = interpolateRate(curves.single, grossAnnual);
+
+  if (input.children > 0) {
+    // household income on the sole-earner reference curves
+    const household = twoEarner ? grossAnnual * 2 : grossAnnual;
+    const married = interpolateRate(curves.married, household);
+    const family = interpolateRate(curves.family, household);
+    if (married > 1e-9) rate *= (family / married) ** (input.children / 2);
   }
-  if (input.children > 0) rate *= Math.max(CHILD_TAX_FACTOR ** input.children, 0.6);
+
   const churchOn =
     data.churchMode === "always" || (data.churchMode === "optional" && input.churchMember);
-  if (churchOn) rate *= data.churchFactor;
+  if (churchOn) rate *= curves.churchFactor;
   return grossAnnual * rate;
+}
+
+/**
+ * Withholding tax (Quellensteuer) per the official 2026 tariff files.
+ * FR/GE/TI/VD/VS determine the rate on annualized income; the other cantons
+ * tax each month separately, so with a 13th salary its payout month is
+ * withheld at the double-month rate.
+ */
+export function withholdingTax(input: SalaryInput): number {
+  const m = input.grossMonthly;
+  if (m <= 0) return 0;
+  const code = qstTariffCode(input.canton, input);
+  const grossAnnual = m * (input.has13th ? 13 : 12);
+  if (QST_ANNUAL_MODEL.has(input.canton))
+    return grossAnnual * qstRate(input.canton, code, grossAnnual / 12);
+  if (!input.has13th) return 12 * m * qstRate(input.canton, code, m);
+  return 11 * m * qstRate(input.canton, code, m) + 2 * m * qstRate(input.canton, code, 2 * m);
+}
+
+/**
+ * Ordinary tax saved by paying the maximum pillar-3a contribution,
+ * approximated by sliding the gross down the official burden curve (the 3a
+ * deduction reduces taxable income one-for-one). For withholding profiles the
+ * saving is realised via the retroactive ordinary assessment, so the ordinary
+ * curve is the right basis there too.
+ */
+export function pillar3aSavings(input: SalaryInput): number {
+  const grossAnnual = input.grossMonthly * (input.has13th ? 13 : 12);
+  if (grossAnnual <= C.pillar3aMax) return 0;
+  return (
+    taxEstimate(grossAnnual, input) -
+    taxEstimate(grossAnnual - C.pillar3aMax, input)
+  );
 }
 
 export function calcSalary(input: SalaryInput): SalaryResult {
@@ -113,7 +158,9 @@ export function calcSalary(input: SalaryInput): SalaryResult {
   const totalSocialAnnual =
     social.ahv + social.alv + social.nbu + social.ktg + social.bvg;
 
-  const taxAnnual = taxEstimate(grossAnnual, input);
+  const taxAnnual = input.quellensteuer
+    ? withholdingTax(input)
+    : taxEstimate(grossAnnual, input);
   const netAnnual = grossAnnual - totalSocialAnnual - taxAnnual;
 
   const childAllowanceMonthly =

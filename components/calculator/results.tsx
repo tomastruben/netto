@@ -372,7 +372,7 @@ export function Results({
 
         <p className="text-[11px] leading-relaxed text-muted-foreground">
           {capped && <span className="mr-1">{t.ceilingNote} ·</span>}
-          {t.estimateNote}{" "}
+          {qst ? t.qstNote : t.estimateNote}{" "}
           <a
             href="https://swisstaxcalculator.estv.admin.ch"
             target="_blank"

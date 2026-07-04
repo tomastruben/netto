@@ -13,6 +13,7 @@ import type { Dict, Locale } from "@/lib/i18n";
 import { SalaryForm } from "./salary-form";
 import { Results } from "./results";
 import { CantonCompare } from "./canton-compare";
+import { Insights } from "./insights";
 import { Monetize } from "./monetize";
 
 export type { CalcState };
@@ -21,10 +22,15 @@ export function Calculator({ dict, locale }: { dict: Dict; locale: Locale }) {
   const [state, setState] = React.useState<CalcState>(DEFAULT_STATE);
   const interacted = React.useRef(false);
 
-  // Hydrate from the share URL once, after mount (avoids SSR mismatch).
+  // Hydrate from the share URL once, after mount. The page is statically
+  // prerendered with DEFAULT_STATE: reading the URL during render would
+  // mismatch that HTML, and useSearchParams would opt the whole calculator
+  // out of prerendering (CSR bailout), so a one-time post-mount set is the
+  // intended trade-off.
   React.useEffect(() => {
     const fromUrl = readUrlState();
     if (Object.keys(fromUrl).length === 0) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setState((s) => applyPatch(s, fromUrl));
   }, []);
 
@@ -54,6 +60,9 @@ export function Calculator({ dict, locale }: { dict: Dict; locale: Locale }) {
         </div>
         <div className="rise rise-4">
           <CantonCompare dict={dict} state={state} locale={locale} />
+        </div>
+        <div className="rise rise-5">
+          <Insights dict={dict} state={state} locale={locale} />
         </div>
         <div className="rise rise-5">
           <Monetize dict={dict} />

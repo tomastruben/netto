@@ -2,6 +2,17 @@
 
 Date: 2026-07-04 · Status: implemented as v1, pending Tomas review
 
+> **Update (2026-07-04, v2 tax data):** income tax now runs on official data.
+> Ordinary curves are generated per household profile (single / married sole /
+> married+2kids / married 50-50) from the ESTV calculator, TaxYear 2026, canton
+> capitals (`scripts/refresh-tax-curves.mjs` → `lib/salary/tax-curves.ts`);
+> withholding tax is computed from the official 2026 QST tariff files, codes
+> A/B/C/H incl. church variants and the month/annual model split
+> (`scripts/refresh-qst-tariffs.mjs` → `lib/salary/qst-tariffs.ts`); child
+> allowances follow the BSV table of 1.1.2026. Reference tests pin official
+> values in `lib/salary/__tests__/tax-reference.test.ts`. Still out of scope:
+> commune selector, Grenzgänger specials.
+
 ## Problem
 
 People in (or moving to) Switzerland cannot easily answer "what lands in my account from a

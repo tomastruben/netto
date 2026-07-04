@@ -73,8 +73,24 @@ export interface Dict {
     composition: string;
     net: string;
     estimateNote: string;
+    qstNote: string;
     estimateLink: string;
     ceilingNote: string;
+  };
+  nav: {
+    calculator: string;
+    guide: string;
+  };
+  insights: {
+    title: string;
+    pillar3a: string;
+    canton: string;
+    familyGapSingle: string;
+    familyGapFamily: string;
+    church: string;
+    qst13: string;
+    disclaimer: string;
+    more: string;
   };
   employer: {
     employeeTab: string;
@@ -117,9 +133,9 @@ export interface Dict {
 
 const de: Dict = {
   meta: {
-    title: "Brutto-Netto-Rechner Schweiz 2026 — Nettolohn berechnen",
+    title: "Brutto-Netto-Rechner Schweiz 2026: Nettolohn berechnen",
     description:
-      "Berechnen Sie Ihren Nettolohn 2026 für alle 26 Kantone: AHV, ALV, NBU, BVG, Quellensteuer und Steuerschätzung — transparent, mit allen Sätzen. Kostenlos und ohne Anmeldung.",
+      "Berechnen Sie Ihren Nettolohn 2026 für alle 26 Kantone: AHV, ALV, NBU, BVG, Quellensteuer und Steuerschätzung. Transparent, mit allen Sätzen. Kostenlos und ohne Anmeldung.",
   },
   form: {
     legend: "Ihre Angaben",
@@ -149,11 +165,11 @@ const de: Dict = {
     permitHint: "B/L: Quellensteuer direkt vom Lohn",
     advanced: "Erweiterte Annahmen",
     nbu: "NBU-Beitrag",
-    nbuHint: "Nichtberufsunfall — je nach Arbeitgeber 0.7–1.7%",
+    nbuHint: "Nichtberufsunfall, 0.7–1.7% je nach Arbeitgeber",
     ktg: "KTG-Beitrag",
-    ktgHint: "Krankentaggeld — oft vom Arbeitgeber übernommen",
+    ktgHint: "Krankentaggeld, oft vom Arbeitgeber übernommen",
     bvgShare: "BVG-Anteil Arbeitnehmer",
-    bvgShareHint: "Gesetzlich max. 50% — viele Kassen zahlen mehr",
+    bvgShareHint: "Gesetzlich max. 50%, viele Kassen zahlen mehr",
   },
   results: {
     netMonthly: "Nettolohn auf der Abrechnung",
@@ -163,7 +179,7 @@ const de: Dict = {
     netAnnual: "pro Jahr",
     afterTax: "Nach Einkommenssteuern",
     afterTaxHint:
-      "Steuern werden separat veranlagt — so viel bleibt effektiv verfügbar.",
+      "Steuern werden separat veranlagt. So viel bleibt effektiv verfügbar.",
     taxWithheld: "Quellensteuer ist im Abzug enthalten.",
     deductions: "Abzüge",
     item: "Position",
@@ -192,8 +208,29 @@ const de: Dict = {
     net: "Netto",
     estimateNote:
       "Steuerbetrag geschätzt (Kantonshauptort, Durchschnittsabzüge). Verbindlich rechnet der offizielle Rechner:",
+    qstNote:
+      "Quellensteuer nach offiziellem ESTV-Tarif 2026. Verbindlich ist die Lohnabrechnung des Arbeitgebers:",
     estimateLink: "Steuerrechner ESTV",
     ceilingNote: "Plafonds berücksichtigt",
+  },
+  nav: {
+    calculator: "Rechner",
+    guide: "Ratgeber",
+  },
+  insights: {
+    title: "Ihre Steuerhebel",
+    pillar3a:
+      "Maximalbetrag in die Säule 3a ({max}) einzahlen spart rund {savings} Steuern pro Jahr.",
+    canton: "Gleiches Profil in {canton}: {gain} mehr Netto pro Jahr.",
+    familyGapSingle:
+      "{canton} besteuert Alleinstehende am härtesten: Sie zahlen {single}, ein Ehepaar mit zwei Kindern zahlt {family} beim gleichen Lohn.",
+    familyGapFamily:
+      "{canton} entlastet Familien stark: Sie zahlen {family}, Alleinstehende zahlen {single} beim gleichen Lohn.",
+    church: "Die Kirchenmitgliedschaft kostet bei Ihrem Lohn rund {cost} pro Jahr.",
+    qst13:
+      "Der Monat mit dem 13. wird zum Doppelmonatssatz besteuert: {december} statt {normal}.",
+    disclaimer: "Grobe Effekte aus den offiziellen Kurven 2026, keine Steuerberatung.",
+    more: "Mehr im Ratgeber",
   },
   employer: {
     employeeTab: "Arbeitnehmer",
@@ -217,13 +254,13 @@ const de: Dict = {
     partnerLabel: "Partner-Empfehlungen",
     pillar3aTitle: "Säule 3a optimieren",
     pillar3aDesc:
-      "Bis 7'258 pro Jahr einzahlen und Steuern sparen — Apps im Vergleich.",
+      "Bis 7'258 pro Jahr einzahlen und Steuern sparen. Apps im Vergleich.",
     pillar3aCta: "3a-Anbieter vergleichen",
     healthTitle: "Krankenkasse wechseln",
     healthDesc: "Prämien 2026 vergleichen und mehrere hundert Franken sparen.",
     healthCta: "Prämien vergleichen",
     relocationTitle: "Neu in der Schweiz?",
-    relocationDesc: "Umzug, Versicherungen, Konto — die wichtigsten Schritte.",
+    relocationDesc: "Umzug, Versicherungen, Konto: die wichtigsten Schritte.",
     relocationCta: "Checkliste öffnen",
   },
   footer: {
@@ -238,9 +275,9 @@ const de: Dict = {
 
 const en: Dict = {
   meta: {
-    title: "Switzerland Net Salary Calculator 2026 — Gross to Net",
+    title: "Switzerland Net Salary Calculator 2026: Gross to Net",
     description:
-      "Calculate your 2026 Swiss net salary for all 26 cantons: AHV, ALV, accident insurance, BVG pension, withholding tax and an income tax estimate — fully transparent, every rate shown. Free, no sign-up.",
+      "Calculate your 2026 Swiss net salary for all 26 cantons: AHV, ALV, accident insurance, BVG pension, withholding tax and an income tax estimate. Fully transparent, every rate shown. Free, no sign-up.",
   },
   form: {
     legend: "Your details",
@@ -270,11 +307,11 @@ const en: Dict = {
     permitHint: "B/L: tax withheld directly from salary",
     advanced: "Advanced assumptions",
     nbu: "NBU contribution",
-    nbuHint: "Non-occupational accident — employer-specific, 0.7–1.7%",
+    nbuHint: "Non-occupational accident, 0.7–1.7% depending on employer",
     ktg: "KTG contribution",
-    ktgHint: "Daily sickness allowance — often employer-paid",
+    ktgHint: "Daily sickness allowance, often employer-paid",
     bvgShare: "BVG employee share",
-    bvgShareHint: "Max. 50% by law — many plans pay more",
+    bvgShareHint: "Max. 50% by law, many plans pay more",
   },
   results: {
     netMonthly: "Net salary on your payslip",
@@ -284,7 +321,7 @@ const en: Dict = {
     netAnnual: "per year",
     afterTax: "After income tax",
     afterTaxHint:
-      "Swiss residents pay income tax separately — this is what's actually left.",
+      "Swiss residents pay income tax separately. This is what's actually left.",
     taxWithheld: "Withholding tax is included in the deductions.",
     deductions: "Deductions",
     item: "Item",
@@ -313,8 +350,28 @@ const en: Dict = {
     net: "Net",
     estimateNote:
       "Tax amount is an estimate (canton capital, average deductions). For binding figures use the official calculator:",
+    qstNote:
+      "Withholding tax per the official 2026 ESTV tariff. Your employer's payslip is binding:",
     estimateLink: "ESTV tax calculator",
     ceilingNote: "Ceilings applied",
+  },
+  nav: {
+    calculator: "Calculator",
+    guide: "Guide",
+  },
+  insights: {
+    title: "Your tax levers",
+    pillar3a: "Maxing your pillar 3a ({max}) saves about {savings} in tax per year.",
+    canton: "Same profile in {canton}: {gain} more net per year.",
+    familyGapSingle:
+      "{canton} taxes singles hardest: you pay {single}, a married couple with two children pays {family} on the same salary.",
+    familyGapFamily:
+      "{canton} strongly favours families: you pay {family}, a single person pays {single} on the same salary.",
+    church: "Church membership costs about {cost} per year at your salary.",
+    qst13:
+      "Your 13th-salary month is withheld at the double-month rate: {december} instead of {normal}.",
+    disclaimer: "Rough effects from the official 2026 curves, not tax advice.",
+    more: "More in the guide",
   },
   employer: {
     employeeTab: "Employee",
@@ -338,13 +395,13 @@ const en: Dict = {
     partnerLabel: "Partner picks",
     pillar3aTitle: "Optimise pillar 3a",
     pillar3aDesc:
-      "Pay in up to 7'258 per year and cut your taxes — apps compared.",
+      "Pay in up to 7'258 per year and cut your taxes. Apps compared.",
     pillar3aCta: "Compare 3a providers",
     healthTitle: "Switch health insurance",
     healthDesc: "Compare 2026 premiums and save several hundred francs.",
     healthCta: "Compare premiums",
     relocationTitle: "New to Switzerland?",
-    relocationDesc: "Moving, insurance, banking — the essential steps.",
+    relocationDesc: "Moving, insurance, banking: the essential steps.",
     relocationCta: "Open the checklist",
   },
   footer: {
@@ -359,9 +416,9 @@ const en: Dict = {
 
 const fr: Dict = {
   meta: {
-    title: "Calculateur salaire net Suisse 2026 — du brut au net",
+    title: "Calculateur salaire net Suisse 2026 : du brut au net",
     description:
-      "Calculez votre salaire net 2026 pour les 26 cantons : AVS, AC, AANP, LPP, impôt à la source et estimation fiscale — transparent, tous les taux affichés. Gratuit, sans inscription.",
+      "Calculez votre salaire net 2026 pour les 26 cantons : AVS, AC, AANP, LPP, impôt à la source et estimation fiscale. Transparent, tous les taux affichés. Gratuit, sans inscription.",
   },
   form: {
     legend: "Vos données",
@@ -391,11 +448,11 @@ const fr: Dict = {
     permitHint: "B/L : impôt prélevé à la source",
     advanced: "Hypothèses avancées",
     nbu: "Cotisation AANP",
-    nbuHint: "Accidents non professionnels — selon l'employeur, 0.7–1.7%",
+    nbuHint: "Accidents non professionnels, 0.7–1.7% selon l'employeur",
     ktg: "Cotisation IJM",
-    ktgHint: "Indemnités journalières maladie — souvent payées par l'employeur",
+    ktgHint: "Indemnités journalières maladie, souvent payées par l'employeur",
     bvgShare: "Part LPP de l'employé",
-    bvgShareHint: "Max. 50% selon la loi — souvent moins",
+    bvgShareHint: "Max. 50% selon la loi, souvent moins",
   },
   results: {
     netMonthly: "Salaire net sur la fiche de paie",
@@ -405,7 +462,7 @@ const fr: Dict = {
     netAnnual: "par an",
     afterTax: "Après impôts sur le revenu",
     afterTaxHint:
-      "Les impôts sont taxés séparément — voici ce qui reste réellement.",
+      "Les impôts sont taxés séparément. Voici ce qui reste réellement.",
     taxWithheld: "L'impôt à la source est inclus dans les retenues.",
     deductions: "Retenues",
     item: "Poste",
@@ -434,8 +491,30 @@ const fr: Dict = {
     net: "Net",
     estimateNote:
       "Montant d'impôt estimé (chef-lieu, déductions moyennes). Pour un calcul officiel :",
+    qstNote:
+      "Impôt à la source selon le barème officiel AFC 2026. Le décompte de l'employeur fait foi :",
     estimateLink: "Calculateur AFC",
     ceilingNote: "Plafonds appliqués",
+  },
+  nav: {
+    calculator: "Calculateur",
+    guide: "Guide",
+  },
+  insights: {
+    title: "Vos leviers fiscaux",
+    pillar3a:
+      "Verser le maximum au pilier 3a ({max}) économise env. {savings} d'impôts par an.",
+    canton: "Même profil à {canton} : {gain} de net en plus par an.",
+    familyGapSingle:
+      "{canton} impose le plus durement les célibataires : vous payez {single}, un couple marié avec deux enfants paie {family} à salaire égal.",
+    familyGapFamily:
+      "{canton} allège fortement les familles : vous payez {family}, une personne seule paie {single} à salaire égal.",
+    church: "L'appartenance à une Église coûte env. {cost} par an à votre salaire.",
+    qst13:
+      "Le mois du 13e salaire est retenu au taux du mois double : {december} au lieu de {normal}.",
+    disclaimer:
+      "Effets approximatifs selon les courbes officielles 2026, pas un conseil fiscal.",
+    more: "Plus dans le guide",
   },
   employer: {
     employeeTab: "Employé·e",
@@ -459,13 +538,13 @@ const fr: Dict = {
     partnerLabel: "Recommandations",
     pillar3aTitle: "Optimiser le pilier 3a",
     pillar3aDesc:
-      "Versez jusqu'à 7'258 par an et réduisez vos impôts — comparatif des apps.",
+      "Versez jusqu'à 7'258 par an et réduisez vos impôts. Comparatif des apps.",
     pillar3aCta: "Comparer les offres 3a",
     healthTitle: "Changer de caisse maladie",
     healthDesc: "Comparez les primes 2026 et économisez plusieurs centaines de francs.",
     healthCta: "Comparer les primes",
     relocationTitle: "Nouveau en Suisse ?",
-    relocationDesc: "Déménagement, assurances, compte — l'essentiel.",
+    relocationDesc: "Déménagement, assurances, compte : l'essentiel.",
     relocationCta: "Ouvrir la checklist",
   },
   footer: {
@@ -480,9 +559,9 @@ const fr: Dict = {
 
 const it: Dict = {
   meta: {
-    title: "Calcolatore stipendio netto Svizzera 2026 — dal lordo al netto",
+    title: "Calcolatore stipendio netto Svizzera 2026: dal lordo al netto",
     description:
-      "Calcola il tuo stipendio netto 2026 per tutti i 26 cantoni: AVS, AD, AINP, LPP, imposta alla fonte e stima fiscale — trasparente, con tutte le aliquote. Gratuito, senza registrazione.",
+      "Calcola il tuo stipendio netto 2026 per tutti i 26 cantoni: AVS, AD, AINP, LPP, imposta alla fonte e stima fiscale. Trasparente, con tutte le aliquote. Gratuito, senza registrazione.",
   },
   form: {
     legend: "I tuoi dati",
@@ -512,9 +591,9 @@ const it: Dict = {
     permitHint: "B/L: imposta trattenuta alla fonte",
     advanced: "Ipotesi avanzate",
     nbu: "Contributo AINP",
-    nbuHint: "Infortuni non professionali — 0.7–1.7% secondo il datore",
+    nbuHint: "Infortuni non professionali, 0.7–1.7% secondo il datore",
     ktg: "Contributo IGM",
-    ktgHint: "Indennità giornaliera malattia — spesso a carico del datore",
+    ktgHint: "Indennità giornaliera malattia, spesso a carico del datore",
     bvgShare: "Quota LPP del dipendente",
     bvgShareHint: "Max. 50% per legge",
   },
@@ -526,7 +605,7 @@ const it: Dict = {
     netAnnual: "all'anno",
     afterTax: "Dopo le imposte sul reddito",
     afterTaxHint:
-      "Le imposte si pagano separatamente — questo è ciò che resta davvero.",
+      "Le imposte si pagano separatamente. Questo è ciò che resta davvero.",
     taxWithheld: "L'imposta alla fonte è inclusa nelle trattenute.",
     deductions: "Trattenute",
     item: "Voce",
@@ -555,8 +634,30 @@ const it: Dict = {
     net: "Netto",
     estimateNote:
       "Imposta stimata (capoluogo, deduzioni medie). Per il calcolo ufficiale:",
+    qstNote:
+      "Imposta alla fonte secondo la tariffa ufficiale AFC 2026. Fa stato il conteggio del datore di lavoro:",
     estimateLink: "Calcolatore AFC",
     ceilingNote: "Massimali applicati",
+  },
+  nav: {
+    calculator: "Calcolatore",
+    guide: "Guida",
+  },
+  insights: {
+    title: "Le tue leve fiscali",
+    pillar3a:
+      "Versare il massimo nel pilastro 3a ({max}) fa risparmiare circa {savings} di imposte all'anno.",
+    canton: "Stesso profilo a {canton}: {gain} di netto in più all'anno.",
+    familyGapSingle:
+      "{canton} tassa più duramente i single: paghi {single}, una coppia sposata con due figli paga {family} a parità di stipendio.",
+    familyGapFamily:
+      "{canton} alleggerisce molto le famiglie: paghi {family}, un single paga {single} a parità di stipendio.",
+    church: "L'appartenenza alla Chiesa costa circa {cost} all'anno al tuo stipendio.",
+    qst13:
+      "Il mese della tredicesima è trattenuto al tasso del mese doppio: {december} invece di {normal}.",
+    disclaimer:
+      "Effetti approssimativi dalle curve ufficiali 2026, non è consulenza fiscale.",
+    more: "Di più nella guida",
   },
   employer: {
     employeeTab: "Dipendente",
@@ -580,13 +681,13 @@ const it: Dict = {
     partnerLabel: "Consigli dei partner",
     pillar3aTitle: "Ottimizza il pilastro 3a",
     pillar3aDesc:
-      "Versa fino a 7'258 all'anno e risparmia sulle imposte — app a confronto.",
+      "Versa fino a 7'258 all'anno e risparmia sulle imposte. App a confronto.",
     pillar3aCta: "Confronta i fornitori 3a",
     healthTitle: "Cambia cassa malati",
     healthDesc: "Confronta i premi 2026 e risparmia centinaia di franchi.",
     healthCta: "Confronta i premi",
     relocationTitle: "Nuovo in Svizzera?",
-    relocationDesc: "Trasloco, assicurazioni, conto — i passi essenziali.",
+    relocationDesc: "Trasloco, assicurazioni, conto: i passi essenziali.",
     relocationCta: "Apri la checklist",
   },
   footer: {

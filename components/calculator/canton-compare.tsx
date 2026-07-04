@@ -4,6 +4,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { compareCantons } from "@/lib/salary/engine";
 import { CANTON_DATA } from "@/lib/salary/cantons";
+import { Badge } from "@/components/ui/badge";
 import { chfWhole } from "@/lib/format";
 import type { Dict, Locale } from "@/lib/i18n";
 import type { CalcState } from "./calculator";
@@ -41,7 +42,6 @@ export function CantonCompare({
         {visible.map((row) => {
           const rank = ranking.indexOf(row) + 1;
           const selected = row.canton === state.canton;
-          const gap = rank > 1 && selected;
           return (
             <li key={row.canton} className="flex items-center gap-3">
               <span className="num w-6 shrink-0 text-right text-[11px] text-muted-foreground">
@@ -54,9 +54,12 @@ export function CantonCompare({
               >
                 {CANTON_DATA[row.canton].names[locale]}
                 {selected && (
-                  <span className="microlabel ml-1.5 text-primary">
+                  <Badge
+                    variant="outline"
+                    className="ml-1.5 h-4 border-primary/40 px-1.5 text-[9px] uppercase tracking-widest text-primary"
+                  >
                     {t.yourCanton}
-                  </span>
+                  </Badge>
                 )}
               </span>
               <div className="h-4 flex-1">

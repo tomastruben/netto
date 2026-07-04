@@ -17,6 +17,8 @@ export const CONST_2026 = {
   uvgCeiling: 148_200,
   /** Non-occupational accident insurance — employer-specific; typical range 0.7%–1.7%. */
   nbuDefault: 0.014,
+  /** Max pillar-3a contribution for employees with a pension fund (BSV, unchanged from 2025). */
+  pillar3aMax: 7_258,
   /** Daily sickness allowance insurance — optional; typical employee share 0%–1%. */
   ktgDefault: 0.005,
   bvg: {
