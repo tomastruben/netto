@@ -19,7 +19,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { chf, chfWhole, pct } from "@/lib/format";
+import { chfWhole, pct } from "@/lib/format";
+import { Money, MoneyWhole, Pct } from "./animated-number";
 import { CONST_2026 } from "@/lib/salary/constants";
 import type { SalaryResult } from "@/lib/salary/engine";
 import type { Dict } from "@/lib/i18n";
@@ -99,7 +100,7 @@ function CompositionBar({ segments, netLabel }: { segments: Segment[]; netLabel:
                 )}
               />
               {s.label}
-              <span className="num">{pct(s.value / total)}</span>
+              <Pct value={s.value / total} className="num" />
             </span>
           ))}
         </div>
@@ -125,20 +126,20 @@ function Row({
 }) {
   return (
     <TableRow>
-      <TableCell className="py-2.5">
+      <TableCell className="py-2.5 whitespace-normal">
         <div className="font-medium">{label}</div>
         {hint && <div className="text-[11px] text-muted-foreground">{hint}</div>}
       </TableCell>
-      <TableCell className="num text-right text-xs text-muted-foreground">
+      <TableCell className="num w-16 text-right text-xs text-muted-foreground">
         {rate ?? ""}
       </TableCell>
-      <TableCell className="num text-right">
+      <TableCell className="num w-28 text-right">
         {negative && monthly > 0 ? "−" : ""}
-        {chf(monthly)}
+        <Money value={monthly} />
       </TableCell>
-      <TableCell className="num hidden text-right text-muted-foreground sm:table-cell">
+      <TableCell className="num w-28 hidden text-right text-muted-foreground sm:table-cell">
         {negative && annual > 0 ? "−" : ""}
-        {chfWhole(annual)}
+        <MoneyWhole value={annual} />
       </TableCell>
     </TableRow>
   );
@@ -200,24 +201,33 @@ export function Results({
             <span className="text-sm text-muted-foreground">
               {qst ? t.netMonthlyQst : t.netMonthly}
             </span>
-            {r.payouts === 13 && (
-              <Badge variant="outline" className="num text-[10px]">
-                × 13
-              </Badge>
-            )}
+            {/* Always mounted so the row height never changes — only fade it in/out.
+                Conditionally rendering it reflowed the hero number below. */}
+            <Badge
+              variant="outline"
+              aria-hidden={r.payouts !== 13}
+              className={`num text-[10px] transition-opacity duration-200 ${
+                r.payouts === 13 ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              × 13
+            </Badge>
           </div>
           <div className="num mt-1 text-5xl font-medium tracking-tight sm:text-7xl">
-            {chf(perPayout(payslipNetAnnual))}
+            <Money value={perPayout(payslipNetAnnual)} />
           </div>
           <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm text-muted-foreground">
             <span>
-              <span className="num text-foreground">{chfWhole(payslipNetAnnual)}</span>{" "}
+              <span className="num text-foreground">
+                <MoneyWhole value={payslipNetAnnual} />
+              </span>{" "}
               {t.netAnnual}
             </span>
             <span>
-              <span className="num text-foreground">
-                {pct(r.grossAnnual > 0 ? payslipNetAnnual / r.grossAnnual : 0)}
-              </span>{" "}
+              <Pct
+                value={r.grossAnnual > 0 ? payslipNetAnnual / r.grossAnnual : 0}
+                className="num text-foreground"
+              />{" "}
               {t.ofGross}
             </span>
           </div>
@@ -234,7 +244,9 @@ export function Results({
               <div className="text-sm font-medium">{t.afterTax}</div>
               <div className="text-[11px] text-muted-foreground">{t.afterTaxHint}</div>
             </div>
-            <div className="num text-2xl">{chf(afterTaxMonthly)}</div>
+            <div className="num text-2xl">
+              <Money value={afterTaxMonthly} />
+            </div>
           </div>
         )}
 
@@ -245,13 +257,13 @@ export function Results({
         </div>
 
         {/* Deduction table */}
-        <Table>
+        <Table className="table-fixed">
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <TableHead className="microlabel h-8">{t.item}</TableHead>
-              <TableHead className="microlabel h-8 text-right">{t.rate}</TableHead>
-              <TableHead className="microlabel h-8 text-right">{t.monthlyCol}</TableHead>
-              <TableHead className="microlabel h-8 hidden text-right sm:table-cell">
+              <TableHead className="microlabel h-8 w-16 text-right">{t.rate}</TableHead>
+              <TableHead className="microlabel h-8 w-28 text-right">{t.monthlyCol}</TableHead>
+              <TableHead className="microlabel h-8 w-28 hidden text-right sm:table-cell">
                 {t.annualCol}
               </TableHead>
             </TableRow>
@@ -322,13 +334,13 @@ export function Results({
             <TableRow className="border-t-2 border-foreground bg-transparent hover:bg-transparent">
               <TableCell className="font-semibold">{t.totalDeductions}</TableCell>
               <TableCell className="num text-right text-xs text-muted-foreground">
-                {pct(r.grossAnnual > 0 ? deductedAnnual / r.grossAnnual : 0)}
+                <Pct value={r.grossAnnual > 0 ? deductedAnnual / r.grossAnnual : 0} />
               </TableCell>
               <TableCell className="num text-right font-semibold">
-                −{chf(perPayout(deductedAnnual))}
+                −<Money value={perPayout(deductedAnnual)} />
               </TableCell>
               <TableCell className="num hidden text-right font-semibold sm:table-cell">
-                −{chfWhole(deductedAnnual)}
+                −<MoneyWhole value={deductedAnnual} />
               </TableCell>
             </TableRow>
             {!qst && (
@@ -340,13 +352,13 @@ export function Results({
                   </div>
                 </TableCell>
                 <TableCell className="num text-right text-xs text-muted-foreground">
-                  {pct(r.taxRate)}
+                  <Pct value={r.taxRate} />
                 </TableCell>
                 <TableCell className="num text-right text-muted-foreground">
-                  −{chf(r.taxAnnual / 12)}
+                  −<Money value={r.taxAnnual / 12} />
                 </TableCell>
                 <TableCell className="num hidden text-right text-muted-foreground sm:table-cell">
-                  −{chfWhole(r.taxAnnual)}
+                  −<MoneyWhole value={r.taxAnnual} />
                 </TableCell>
               </TableRow>
             )}
@@ -360,10 +372,10 @@ export function Results({
                 </TableCell>
                 <TableCell />
                 <TableCell className="num text-right text-primary">
-                  +{chf(r.childAllowanceMonthly)}
+                  +<Money value={r.childAllowanceMonthly} />
                 </TableCell>
                 <TableCell className="num hidden text-right text-primary sm:table-cell">
-                  +{chfWhole(r.childAllowanceMonthly * 12)}
+                  +<MoneyWhole value={r.childAllowanceMonthly * 12} />
                 </TableCell>
               </TableRow>
             )}
@@ -390,18 +402,19 @@ export function Results({
             {dict.employer.totalCost}
           </span>
           <div className="num mt-1 text-5xl font-medium tracking-tight sm:text-7xl">
-            {chfWhole(r.grossAnnual + r.employer.totalAnnual)}
+            <MoneyWhole value={r.grossAnnual + r.employer.totalAnnual} />
           </div>
           <div className="mt-2 text-sm text-muted-foreground">
             {dict.employer.totalCostHint} —{" "}
             <span className="num text-foreground">
-              +{pct(r.grossAnnual > 0 ? r.employer.totalAnnual / r.grossAnnual : 0)}
+              +
+              <Pct value={r.grossAnnual > 0 ? r.employer.totalAnnual / r.grossAnnual : 0} />
             </span>{" "}
             {dict.employer.onTop}
           </div>
         </div>
 
-        <Table>
+        <Table className="table-fixed">
           <TableBody>
             <Row
               label={t.grossLabel}
@@ -425,10 +438,10 @@ export function Results({
               <TableCell className="font-semibold">{dict.employer.totalCost}</TableCell>
               <TableCell />
               <TableCell className="num text-right font-semibold">
-                {chf(perPayout(r.grossAnnual + r.employer.totalAnnual))}
+                <Money value={perPayout(r.grossAnnual + r.employer.totalAnnual)} />
               </TableCell>
               <TableCell className="num hidden text-right font-semibold sm:table-cell">
-                {chfWhole(r.grossAnnual + r.employer.totalAnnual)}
+                <MoneyWhole value={r.grossAnnual + r.employer.totalAnnual} />
               </TableCell>
             </TableRow>
           </TableFooter>

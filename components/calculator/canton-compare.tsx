@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { compareCantons } from "@/lib/salary/engine";
 import { CANTON_DATA } from "@/lib/salary/cantons";
 import { Badge } from "@/components/ui/badge";
-import { chfWhole } from "@/lib/format";
+import { MoneyWhole } from "./animated-number";
 import type { Dict, Locale } from "@/lib/i18n";
 import type { CalcState } from "./calculator";
 
@@ -73,7 +73,7 @@ export function CantonCompare({
                   selected ? "font-semibold" : "text-muted-foreground"
                 }`}
               >
-                {chfWhole(row.netAnnual)}
+                <MoneyWhole value={row.netAnnual} />
               </span>
             </li>
           );
